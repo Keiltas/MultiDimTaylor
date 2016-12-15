@@ -1,0 +1,45 @@
+    % Before we start with Taylor interpolation, it is convinient to calculate first two derivatives of
+    % volatility curve with respect to corresponding underlying spot price
+    % for each risky asset.
+
+   
+ % Column vector for respective derivatives
+%     ATMder = zeros(nUnderlyings, 1);
+%     ATMcurv = zeros(nUnderlyings, 1);   
+%  
+%     for k = 1:nUnderlyings
+%         [ATMder(k), ATMcurv(k)] = ATMForwardDerivatives(ATMVolatility(k), ForwardPrice(k), StrikePrice, Time, BreakpointScaleFactor);
+%     end
+    
+
+  
+    
+    % This row vector contains 'full' first-order derivatives (of the form dV/dSk) that
+    % are then directly used in Taylor series. Note that this is not the
+    % same thing as delta(Greek).
+    % K-th element reflects linear changes in option price w.r.t. changes in k-th asset.
+    skewDelta = zeros(1, nUnderlyings);
+    
+
+ 
+    for k = 1:nUnderlyings
+        skewDelta(k) = delta(k) + gamma(:, k)' * dS' + ...
+            vega(k) * ATMder(k) + vomma(:, k)' * dSigma * ATMder(k) + vanna(:, k)' * dS' * ATMder(k) + ...
+            vanna(k, :) * dSigma;
+    end
+    
+    % This row vector contains 'full' second-order derivatives (of the form d^2V/dSk^2) that
+    % are then directly used in Taylor series. Note that this is not the
+    % same thing as gamma(Greek).
+    % K-th element reflects quadratic changes in option price w.r.t. changes in k-th asset.
+    
+    skewGamma = zeros(1, nUnderlyings);
+    
+    for k = 1:nUnderlyings
+        skewGamma(k) = gamma(k, k) + vega(k) * ATMcurv(k) + ...
+            vomma(k, k) * ATMder(k) ^ 2 + vomma(:, k)' * dSigma * ATMcurv(k) + ...
+            2 * vanna(k, k) * ATMder(k) + vanna(:, k)' * dS' * ATMcurv(k);
+    end
+     
+    % Taylor series itslef
+    %OptionPrice = oldPrice + skewDelta * dS' + 0.5 * skewGamma * (dS.^ 2)';
