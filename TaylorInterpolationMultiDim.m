@@ -1,17 +1,27 @@
-function OptionPrice = TaylorInterpolationMultiDim(oldPrice, dS,  ForwardPrice, NewForwardPrice, StrikePrice, RefVolatility, Time, BreakpointScaleFactor, Greeks) %GreeksInput!!
+function OptionPrice = TaylorInterpolationMultiDim(oldPrice, Data, Greeks) %GreeksInput!!
 
     %nUnderlyings = size(ForwardPrice, 2);
+    run(Data);
     run(Greeks);
     % This column vector is responsible for keeping changes of volatility of i-th
     % underlying (that appear due to changes of spot price)
-    
-    %dSigma = zeros(nUnderlyings, 1);     
 
-    dSigma = ([ 
-0.09055837251
-0.18607859691
-0.10057761616
-] - (RefVolatility / 100)');
+    NewVolatility = zeros(1, nUnderlyings);
+    
+    for i = 1:nUnderlyings 
+        ATMVolPathTemp = ATMVolPath([101, 110, 90], [9, 10, 9.5]);  
+        
+        SplineTemp = TBVolatilitySpline('Data.m', 'VolatilityInput.m', B);
+
+        NewVolatility(i) = SpotToForwardPrice(SpotPrice(i) + dS(i), rfRate(i), 0, volatilityTTM(i));
+    end    
+
+ 
+
+    % This column vector is responsible for keeping changes of volatility of i-th
+    % underlying (that appear due to changes of spot price)    
+    
+    dSigma = ([0;0;0] - (refVolatility / 100)');
     
        
     
